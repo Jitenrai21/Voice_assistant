@@ -1,52 +1,61 @@
-import pyttsx3
-import speech_recognition as sr
+# Importing all the needed packages
+import pyttsx3 # for text to speech(in robotic voice) translation
+import speech_recognition as sr # converts spoken words into text
 import pyjokes
 import webbrowser
 import datetime
 import os
 import time
 
+#This is the function to capture speech and convert to text
 def sptext():
-    recognizer = sr.Recognizer()
-    with sr.Microphone() as source:
-        print("Listening...")
-        recognizer.adjust_for_ambient_noise(source)
-        audio = recognizer.listen(source)
+    recognizer = sr.Recognizer() #initializa an object of Speech recognizer
+    with sr.Microphone() as source: #use mic for input voice
+        print("Listening...") #status update for user
+        recognizer.adjust_for_ambient_noise(source) #adjusting bg noises
+        audio = recognizer.listen(source) #record audio from source
         try:
-            print("Recognizing...")
-            data = recognizer.recognize_google(audio)
-            print(data)
-            return data
-        except sr.UnknownValueError:
-            print("Couldn't understand the message.")
-            return sptext()
-def speechtx(x):
-    engine = pyttsx3.init()
-    voices = engine.getProperty("voices")
+            print("Recognizing...") #status update
+            data = recognizer.recognize_google(audio) #using google speech recognition to convert audio to text
+            print(data) #display recognized text
+            return data #return text data
+        except sr.UnknownValueError: #exception handling
+            print("Couldn't understand the message.") #error message
+            return sptext() #recursion to let the user try again
+        
+#This function is to output the comprehended text into speech
+def speechtx(x): 
+    engine = pyttsx3.init() #initialize text-to-speech engine
+    voices = engine.getProperty("voices") #get voice options
     engine.setProperty('voice', voices[0].id) #[0] indicates male voice
-    rate = engine.getProperty('rate')
-    engine.setProperty('rate',150)
-    engine.say(x)
-    engine.runAndWait()
+    rate = engine.getProperty('rate') #understand current speech rate
+    engine.setProperty('rate',150) #set the speech rate to 150 words per minute
+    engine.say(x) #queue the text
+    engine.runAndWait() #process and play the queue
 
+
+#main program execution function
 if __name__ == '__main__':
+    #initial greetings to the user (text and speech)
     print('Hello I am Jarvis AI your voice-commanded virtual assistant.')
     speechtx("Hello I am Jarvis AI your voice-commanded virtual assistant.")
+    # main loop to keep the assistant running
     while True:
-        command = sptext().lower()
-        if 'jarvis' in command: 
-            print('I am ready for your command.')
+        command = sptext().lower() #get the command from sptext() function and convert into lowercase
+        if 'jarvis' in command: #check for wake word
+            print('I am ready for your command.') #status update
             speechtx("I am ready for your command.")
-            while True:
+            while True: #command running loop
                     data1 = sptext().lower()
+                    #list of sites
                     sites = [['youtube', 'https://www.youtube.com/'], ['chat gpt', 'https://chatgpt.com/'], ['github account', 'https://github.com/Jitenrai21']]
-                    for site in sites:
-                        if f'Open {site[0]}'.lower() in data1:
-                            speechtx(f'Opening {site[0]}')
-                            webbrowser.open(site[1])
-                    if "how are you" in data1:
-                        reply = 'I am doing great, How are you?'
-                        print(reply)
+                    for site in sites: #loop to understand and open site as per the prompt
+                        if f'Open {site[0]}'.lower() in data1: #understanding input
+                            speechtx(f'Opening {site[0]}') #status update in audio
+                            webbrowser.open(site[1]) #webbrowser package to open website
+                    if "how are you" in data1: #looking for specific cue
+                        reply = 'I am doing great, How are you?' #predefined output
+                        print(reply) 
                         speechtx(reply)
                     if 'your name' in data1:
                         name = "It's so silly for you to ask again. My name is Javis."
@@ -82,8 +91,8 @@ if __name__ == '__main__':
                         break    
                     # time.sleep(5)
             break
-        else:
+        else: #prompt user to use wake word if not detected
             print("Call by my name Jarvis for service.")
             speechtx("activate by calling me by my name Jarvis.")
-            sptext()
+            sptext() #continue listening for wake word
         
